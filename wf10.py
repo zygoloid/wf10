@@ -11,7 +11,7 @@ class Key(object):
   def __init__(self, code):
     keys[code] = self
     self.pressed = False
-  def __nonzero__(self):
+  def __bool__(self):
     return self.pressed
 
 def wrap(x, y):
@@ -62,12 +62,12 @@ class Vector(object):
   @staticmethod
   def random(): return Vector(random.random() * 2 - 1, random.random() * 2 - 1)
   def __getitem__(self, n): return (self.x, self.y)[n]
-  def __nonzero__(self): return bool(self.x or self.y)
+  def __bool__(self): return bool(self.x or self.y)
   def __neg__(self): return Vector(-self.x, -self.y)
   def __add__(self, o): return Vector(self.x+o[0], self.y+o[1])
   def __sub__(self, o): return self + -o
   def __mul__(self, o): return Vector(self.x*o, self.y*o)
-  def __div__(self, o): return self * (1/o)
+  def __truediv__(self, o): return self * (1/o)
   def norm(self): return (self.x*self.x + self.y*self.y) ** 0.5
   def normal(self):
     if not self: return Vector()
@@ -317,12 +317,12 @@ def newGame(players):
 
   objects.extend([Wave() for n in range(100)])
 
-  config = dict(up='\x1bOA', down='\x1bOB', left='\x1bOD', right='\x1bOC', fire='/')
+  config = dict(up=b'\x1bOA', down=b'\x1bOB', left=b'\x1bOD', right=b'\x1bOC', fire=b'/')
   ship1 = Ship(config, 30, 30, 'a')
   objects.append(ship1)
 
   if players == 2:
-    config = dict(up='w', down='s', left='a', right='d', fire='q')
+    config = dict(up=b'w', down=b's', left=b'a', right=b'd', fire=b'q')
     ship2 = Ship(config, size[1] - 30, size[0] * 2 - 30, 'p')
     objects.append(ship2)
   else:
@@ -359,8 +359,8 @@ def play(s):
   screen = s
 
   lastTime = time.time()
-  startNewGame1 = Key('n')
-  startNewGame2 = Key('N')
+  startNewGame1 = Key(b'n')
+  startNewGame2 = Key(b'N')
   secsPerFrame = 1/60.
   sb = None
   while True:
@@ -369,10 +369,10 @@ def play(s):
       time.sleep(secsPerFrame - timeToNext)
     global frames
     frames += 1
-    for key in keys.itervalues(): key.pressed = False
+    for key in keys.values(): key.pressed = False
     str = getkeys()
     while str:
-      for char, key in keys.iteritems():
+      for char, key in keys.items():
         if str.startswith(char):
           str = str[len(char):]
           key.pressed = True
@@ -410,7 +410,7 @@ def main(cb = None):
     except KeyboardInterrupt:
       pass
   finally:
-    print '%f frames per second' % (frames / (time.time() - firstTime))
+    print('%f frames per second' % (frames / (time.time() - firstTime)))
 
 if __name__ == '__main__':
   main()
